@@ -1,61 +1,58 @@
-const formState = 'feedback-form-state';
+const formStateKey = 'feedback-form-state';
 const form = document.querySelector('.feedback-form');
 
-// get local storage data
-const localState = JSON.parse(localStorage.getItem(formState));
+const formData = {
+  email: '',
+  message: ''
+};
 
-if (localState) {
-  // fill form fields from local storage
-  for (const key of Object.keys(localState)) {
-    document.querySelector(`[name="${key}"]`).value = localState[key];
+const savedData = JSON.parse(localStorage.getItem(formStateKey));
+if (savedData) {
+  for (const key in savedData) {
+    const input = document.querySelector(`[name="${key}"]`);
+    if (input) {
+      input.value = savedData[key];
+      formData[key] = savedData[key];
+    }
   }
 }
 
-// event to fill in form state object **//
-form.addEventListener('input', onInputSaveToLocalStorage);
-
-// save form form data to local storage **//
-form.addEventListener('submit', onSubmitForm);
-
-function onInputSaveToLocalStorage(event) {
+form.addEventListener('input', event => {
   const key = event.target.name;
-  const updatedStorage = {
-    ...JSON.parse(localStorage.getItem(formState)),
-    [key]: event.target.value.trim(),
-  };
+  const value = event.target.value.trim();
 
-  localStorage.setItem(formState, JSON.stringify(updatedStorage));
-}
+  formData[key] = value;
+  localStorage.setItem(formStateKey, JSON.stringify(formData));
+});
 
-function onSubmitForm(event) {
+form.addEventListener('submit', event => {
   event.preventDefault();
 
-  const formData = new FormData(event.target);
-  const formDataObj = Object.fromEntries(formData.entries());
-  if (validateFormFields(formDataObj)) {
-    // according requirement of Homework 9
-    console.log('submit', formDataObj);
+  if (validateFormFields(formData)) {
+    console.log('submit', formData);
 
-    localStorage.removeItem(formState);
-
-    event.target.reset();
+    localStorage.removeItem(formStateKey);
+    form.reset();
+    formData.email = '';
+    formData.message = '';
   }
-}
+});
 
-function validateFormFields(formDataObj) {
+
+function validateFormFields(data) {
   let isValid = true;
-  for (const key in formDataObj) {
-    if (!formDataObj[key]) {
-      addBorderInputError(document.querySelector(`[name="${key}"]`));
+  for (const key in data) {
+    const input = document.querySelector(`[name="${key}"]`);
+    if (!data[key]) {
+      addBorderInputError(input);
       isValid = false;
-    }
-    if (formDataObj[key]) {
-      removeBorderInputError(document.querySelector(`[name="${key}"]`));
+    } else {
+      removeBorderInputError(input);
     }
   }
-
   return isValid;
 }
+
 
 function addBorderInputError(input) {
   input.classList.add('error');
