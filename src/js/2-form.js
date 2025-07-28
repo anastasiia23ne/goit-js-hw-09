@@ -35,6 +35,8 @@ form.addEventListener('submit', event => {
     form.reset();
     formData.email = '';
     formData.message = '';
+  } else {
+    alert('Будь ласка, заповніть всі поля форми.');
   }
 });
 
